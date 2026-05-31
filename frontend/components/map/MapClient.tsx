@@ -122,8 +122,8 @@ export function MapClient({
         busy={busy}
       />
       <div className="absolute left-3 top-3 z-[1100] flex flex-col gap-2">
-        <ZoomControl center={resetCenter} />
         <InfoButton />
+        <ZoomControl center={resetCenter} />
       </div>
       <PlayersPanel worldName={worldName} maxPlayers={global.maxPlayers} />
       <CoordsBox worldName={worldName} maxOut={maxOut} />

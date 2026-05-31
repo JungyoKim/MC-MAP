@@ -76,7 +76,7 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold ${open ? "border-b border-white/10" : ""}`}
+          className={`flex h-8 items-center gap-1.5 px-2.5 text-xs font-semibold ${open ? "border-b border-white/10" : ""}`}
         >
           {open ? (
             <>
@@ -96,9 +96,9 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
           )}
         </button>
       ) : (
-        <div className="border-b border-white/10 px-3 py-2 text-sm font-semibold">
+        <div className="flex h-9 items-center border-b border-white/10 px-3 text-sm font-semibold">
           플레이어{" "}
-          <span className="text-neutral-400">
+          <span className="ml-1 text-neutral-400">
             {online}/{maxPlayers}
           </span>
         </div>

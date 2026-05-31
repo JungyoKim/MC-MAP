@@ -23,7 +23,7 @@ function Segmented<T extends string>({
   busy?: boolean;
 }) {
   return (
-    <div className="pointer-events-auto flex gap-1 rounded-lg bg-neutral-900/95 p-1 shadow-xl ring-1 ring-white/10">
+    <div className="pointer-events-auto flex h-8 items-stretch gap-1 rounded-lg bg-neutral-900/95 px-1 shadow-xl ring-1 ring-white/10 sm:h-9">
       {items.map((it) => {
         const active = it.key === value;
         return (
@@ -33,7 +33,7 @@ function Segmented<T extends string>({
             disabled={busy}
             aria-pressed={active}
             onClick={() => onChange(it.key)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-50 sm:px-3 sm:py-1.5 sm:text-sm ${
+            className={`inline-flex h-full items-center rounded-md px-2.5 text-xs font-medium transition-colors disabled:opacity-50 sm:px-3 sm:text-sm ${
               active
                 ? "bg-sky-500/90 text-white"
                 : "text-neutral-300 hover:bg-white/10"
