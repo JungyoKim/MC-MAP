@@ -14,7 +14,7 @@ export function ZoomControl({ center }: ZoomControlProps) {
     "flex size-8 sm:size-9 items-center justify-center text-neutral-200 transition-colors hover:bg-white/10 active:bg-white/20 disabled:opacity-40";
 
   return (
-    <div className="pointer-events-auto absolute left-3 top-3 z-[1100] flex flex-col overflow-hidden rounded-lg bg-neutral-900/85 text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur">
+    <div className="pointer-events-auto absolute left-3 top-3 z-[1100] flex flex-col overflow-hidden rounded-lg bg-neutral-900/95 text-neutral-100 shadow-xl ring-1 ring-white/10">
       <button
         type="button"
         aria-label="확대"

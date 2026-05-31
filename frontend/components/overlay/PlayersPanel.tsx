@@ -68,7 +68,7 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
 
   return (
     <div
-      className={`pointer-events-auto absolute right-3 top-3 z-[1100] flex flex-col overflow-hidden rounded-lg bg-neutral-900/85 text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur ${
+      className={`pointer-events-auto absolute right-3 top-3 z-[1100] flex flex-col overflow-hidden rounded-lg bg-neutral-900/95 text-neutral-100 shadow-xl ring-1 ring-white/10 ${
         collapsed ? "w-auto" : "w-44 sm:w-56"
       }`}
     >

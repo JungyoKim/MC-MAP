@@ -63,7 +63,6 @@ export function MapView({
       zoomSnap={global.zoom.snap}
       zoomDelta={global.zoom.delta}
       wheelPxPerZoomLevel={global.zoom.wheel}
-      preferCanvas
       zoomControl={false}
       attributionControl={false}
       style={{ height: "100dvh", width: "100vw", background: "#0a0a0a" }}
@@ -77,7 +76,7 @@ export function MapView({
         minZoom={-EXTRA_ZOOM_OUT}
         maxZoom={opts.maxZoom}
         zoomOffset={opts.zoomOffset}
-        keepBuffer={4}
+        keepBuffer={1}
       />
       <InitialView center={center} zoom={initZoom} minZoom={-EXTRA_ZOOM_OUT} />
       <MapBounds

@@ -24,8 +24,8 @@ export function ServerInfo() {
       type="button"
       onClick={copy}
       title="클릭하여 주소 복사"
-      className={`pointer-events-auto absolute left-1/2 top-3 z-[1100] w-auto -translate-x-1/2 overflow-hidden rounded-xl text-left text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur transition-colors sm:left-auto sm:right-3 sm:top-auto sm:bottom-3 sm:w-60 sm:translate-x-0 ${
-        copied ? "bg-emerald-500/85" : "bg-neutral-900/85 hover:bg-neutral-800/85"
+      className={`pointer-events-auto absolute left-1/2 top-3 z-[1100] w-auto -translate-x-1/2 overflow-hidden rounded-xl text-left text-neutral-100 shadow-xl ring-1 ring-white/10 transition-colors sm:left-auto sm:right-3 sm:top-auto sm:bottom-3 sm:w-60 sm:translate-x-0 ${
+        copied ? "bg-emerald-500/90" : "bg-neutral-900/95 hover:bg-neutral-800/95"
       }`}
     >
       {/* 제목 — 데스크탑만 */}

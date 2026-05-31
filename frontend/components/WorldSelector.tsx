@@ -23,7 +23,7 @@ function Segmented<T extends string>({
   busy?: boolean;
 }) {
   return (
-    <div className="pointer-events-auto flex gap-1 rounded-lg bg-neutral-900/85 p-1 shadow-xl ring-1 ring-white/10 backdrop-blur">
+    <div className="pointer-events-auto flex gap-1 rounded-lg bg-neutral-900/95 p-1 shadow-xl ring-1 ring-white/10">
       {items.map((it) => {
         const active = it.key === value;
         return (
