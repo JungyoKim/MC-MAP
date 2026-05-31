@@ -6,11 +6,11 @@ import {
 } from "@/lib/pl3x/server";
 
 /**
- * 서버에서 settings 페치 후 지도 렌더. showPlayers 로 플레이어 위치 표시 여부 결정.
- * - 공개 / : showPlayers=false (플레이어 데이터 자체를 안 가져옴)
- * - /admin : showPlayers=true
+ * 서버에서 settings 페치 후 지도 렌더.
+ * - 공개 / : 온라인 목록 패널만(showPlayerList), 지도 위치 마커는 숨김(showPlayerMarkers=false)
+ * - /admin : 둘 다 (마커/추적 포함)
  */
-export async function MapPage({ showPlayers }: { showPlayers: boolean }) {
+export async function MapPage({ admin = false }: { admin?: boolean }) {
   const global = await fetchGlobalSettings();
   const first = defaultWorld(global);
   const world = await fetchWorldSettings(first.name);
@@ -22,7 +22,8 @@ export async function MapPage({ showPlayers }: { showPlayers: boolean }) {
       world={world}
       worldName={first.name}
       renderer={renderer}
-      showPlayers={showPlayers}
+      showPlayerList={true}
+      showPlayerMarkers={admin}
     />
   );
 }

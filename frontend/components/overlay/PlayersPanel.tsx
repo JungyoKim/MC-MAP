@@ -8,6 +8,8 @@ import { useFollowStore } from "@/lib/store/follow";
 interface PlayersPanelProps {
   worldName: string;
   maxPlayers: number;
+  /** 클릭 시 추적/이동 가능 여부. 공개 /(위치 비표시)에서는 false → 목록만 */
+  interactive?: boolean;
 }
 
 function UserIcon({ className }: { className?: string }) {
@@ -41,7 +43,11 @@ function PlayerAvatar({ uuid, name }: { uuid: string; name: string }) {
   );
 }
 
-export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
+export function PlayersPanel({
+  worldName,
+  maxPlayers,
+  interactive = true,
+}: PlayersPanelProps) {
   const players = usePlayersStore((s) => s.players);
   const online = usePlayersStore((s) => s.online);
   const followUuid = useFollowStore((s) => s.followUuid);
@@ -112,6 +118,19 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
             </p>
           ) : (
             list.map((p) => {
+              const name = p.displayName || p.name;
+              if (!interactive) {
+                // 공개 /: 위치 비표시 → 클릭/추적 없이 목록만
+                return (
+                  <div
+                    key={p.uuid}
+                    className="flex items-center gap-2 px-2 py-1.5"
+                  >
+                    <PlayerAvatar uuid={p.uuid} name={name} />
+                    <span className="flex-1 truncate text-sm">{name}</span>
+                  </div>
+                );
+              }
               const following = followUuid === p.uuid;
               const otherWorld = !!p.world && p.world !== worldName;
               return (
@@ -123,10 +142,8 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
                   onPress={() => toggleFollow(p.uuid)}
                   className={`justify-start gap-2 px-2 ${following ? "bg-sky-500/25" : ""}`}
                 >
-                  <PlayerAvatar uuid={p.uuid} name={p.displayName || p.name} />
-                  <span className="flex-1 truncate text-left text-sm">
-                    {p.displayName || p.name}
-                  </span>
+                  <PlayerAvatar uuid={p.uuid} name={name} />
+                  <span className="flex-1 truncate text-left text-sm">{name}</span>
                   {following && <span className="text-xs text-sky-300">추적</span>}
                   {!following && otherWorld && (
                     <span className="text-[10px] text-neutral-500">다른 월드</span>

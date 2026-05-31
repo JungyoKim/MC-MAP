@@ -29,8 +29,10 @@ export interface MapViewProps {
   /** 월드 재진입 시 복원할 뷰 (없으면 기본) */
   initialCenter?: [number, number];
   initialZoom?: number;
-  /** 플레이어 위치 표시 여부 (공개 / 에서는 false) */
-  showPlayers?: boolean;
+  /** 온라인 플레이어 목록 패널 표시 (공개 / 에서도 true) */
+  showPlayerList?: boolean;
+  /** 플레이어 위치(지도 마커/추적) 표시 — /admin 에서만 true */
+  showPlayerMarkers?: boolean;
 }
 
 export function MapView({
@@ -40,10 +42,11 @@ export function MapView({
   renderer,
   initialCenter,
   initialZoom,
-  showPlayers = true,
+  showPlayerList = true,
+  showPlayerMarkers = true,
 }: MapViewProps) {
-  usePlayerStream(showPlayers);
-  usePlayerMarkers(worldName, showPlayers);
+  usePlayerStream(showPlayerList); // 패널(이름/수)용 settings 스트림
+  usePlayerMarkers(worldName, showPlayerMarkers); // 지도 마커(위치)용
   const opts = tileLayerOptions(world.zoom);
   const center =
     initialCenter ??
@@ -86,7 +89,7 @@ export function MapView({
         maxOut={world.zoom.maxOut}
         fitOnLoad={initialZoom === undefined}
       />
-      {showPlayers && (
+      {showPlayerMarkers && (
         <PlayersLayer worldName={worldName} maxOut={world.zoom.maxOut} />
       )}
     </MapContainer>

@@ -28,8 +28,10 @@ export interface MapClientProps {
   world: WorldSettings;
   worldName: string;
   renderer: string;
-  /** 플레이어 위치/패널 표시 (공개 / 에서는 false, /admin 에서는 true) */
-  showPlayers?: boolean;
+  /** 온라인 플레이어 목록 패널 (/ 와 /admin 모두) */
+  showPlayerList?: boolean;
+  /** 플레이어 위치(지도 마커/추적) — /admin 에서만 */
+  showPlayerMarkers?: boolean;
 }
 
 export function MapClient({
@@ -37,7 +39,8 @@ export function MapClient({
   world: initialWorld,
   worldName: initialWorldName,
   renderer: initialRenderer,
-  showPlayers = false,
+  showPlayerList = false,
+  showPlayerMarkers = false,
 }: MapClientProps) {
   const [worldName, setWorldName] = useState(initialWorldName);
   const [renderer, setRenderer] = useState(initialRenderer);
@@ -90,7 +93,7 @@ export function MapClient({
   const followUuid = useFollowStore((s) => s.followUuid);
   const players = usePlayersStore((s) => s.players);
   useEffect(() => {
-    if (!followUuid) return;
+    if (!showPlayerMarkers || !followUuid) return;
     const p = players[followUuid];
     if (p?.world && p.world !== worldName) void changeWorld(p.world);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -115,7 +118,8 @@ export function MapClient({
         renderer={renderer}
         initialCenter={savedView?.center}
         initialZoom={savedView?.zoom}
-        showPlayers={showPlayers}
+        showPlayerList={showPlayerList}
+        showPlayerMarkers={showPlayerMarkers}
       />
       <WorldSelector
         worlds={worlds}
@@ -129,8 +133,12 @@ export function MapClient({
         <InfoButton />
         <ZoomControl center={resetCenter} />
       </div>
-      {showPlayers && (
-        <PlayersPanel worldName={worldName} maxPlayers={global.maxPlayers} />
+      {showPlayerList && (
+        <PlayersPanel
+          worldName={worldName}
+          maxPlayers={global.maxPlayers}
+          interactive={showPlayerMarkers}
+        />
       )}
       <CoordsBox worldName={worldName} maxOut={maxOut} />
     </div>
