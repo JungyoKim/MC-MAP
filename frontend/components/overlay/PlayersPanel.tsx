@@ -48,14 +48,15 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
   const toggleFollow = useFollowStore((s) => s.toggleFollow);
 
   // 모바일에서만 접기 가능 (데스크탑은 항상 펼침)
+  // 주의: MediaQueryList.addEventListener 는 iOS Safari 14+ 전용이라 구버전에서 throw →
+  // 어디서나 되는 resize 이벤트로 판별.
   const [isMobile, setIsMobile] = useState(false);
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
   const collapsed = isMobile && !open;

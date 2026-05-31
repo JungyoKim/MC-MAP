@@ -119,6 +119,14 @@ interface Player {
 - **좌표 클릭 복사**: 지도 클릭 시 그 지점 좌표를 `x y z`(공백 구분, y 없으면 `x z`)로 복사. 피드백은 별도 토스트가 아니라 **좌표 박스 자체가 초록 반투명(rgba(16,185,129,.85))으로 transition + "클릭 복사"→"복사됨"** (1.5s 후 복귀). 복사 피드백도 ref/DOM 으로 처리(리렌더로 좌표 텍스트 초기화 방지). 호버 표시는 window mousemove. `lib/clipboard.ts` 가 navigator.clipboard(secure) → execCommand 폴백(HTTP 대비).
 - **첫 진입 시 전체보기**: `MapClient`가 저장된 뷰 없을 때 `fitOnLoad`를 MapView→MapBounds로 전달, MapBounds가 fit 계산 후 `map.fitBounds(world)`로 월드 전체를 맞춤. 페이지 새로고침 시 viewMemory(useRef) 초기화되므로 매 진입마다 적용. 재방문(저장된 뷰 있음)은 복원 우선. 검증: 첫 로드 80타일(전체) vs 기본줌 8타일.
 
+## 모바일 반응형 ✅
+- `app/layout.tsx` viewport: device-width + 페이지 핀치줌 비활성(지도 핀치줌과 충돌 방지) + viewport-fit cover.
+- **CoordsBox**: 항상 하단중앙(모바일/데스크탑 공통), 모바일 컴팩트.
+- **ServerInfo**: 모바일=상단중앙(월드선택 위, 단일행 컴팩트, w-auto) / 데스크탑=우하단 풀카드(w-60). 반응형 클래스로 제목·안내는 `hidden sm:block`.
+- **WorldSelector**: 모바일 `top-14`(ServerInfo 아래) / 데스크탑 `top-3`. 버튼 컴팩트(text-xs sm:text-sm).
+- **PlayersPanel**: 모바일만 접기(matchMedia로 분기) — 접힘=SVG 사람아이콘+접속수 칩(이모지 X, text-xs 컴팩트), 펼침=목록. 데스크탑=항상 펼침(토글 없음, w-56). 
+- **ZoomControl**: size-8 sm:size-9.
+
 ## 지도 UX 개선 (드래그/줌/깜빡임) ✅
 - **전체 보기 + snap 제거 (최종)**: `components/map/MapBounds.tsx` — **maxBounds 안 씀**(snap/충돌 원인이라 코드단위 제거). 대신 World Border 마커 범위로: ① `setMinZoom(getBoundsZoom(world.pad(0.05)))` → 축소 최대 = 월드 전체 한눈에. ② 타일 레이어 `options.bounds=world`+redraw → 빈 영역 드래그해도 타일 요청 안 감(요청 낭비 차단). MapView `minZoom=-EXTRA_ZOOM_OUT(-8)`+타일 `minZoom=-8`로 축소 시 native(maxOut) 타일 스케일 표시(그리드 maxNativeZoom 고정→요청 수 불변). 검증: minZoom -2에서 viewSeesWholeWorld=true, hasMaxBounds=false. 길 잃으면 ZoomControl ⌖(리셋)로 복귀. worldborder 없는 월드는 미적용.
   - 경위: maxBounds(viscosity 1.0=경계 충돌, 0=튕김)가 사용자에게 거슬려 제거. 무한 드래그 "맵 분실"은 타일 bounds(빈 곳 안 그림)+리셋 버튼+전체보기 줌으로 대체.
