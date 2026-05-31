@@ -1,0 +1,9 @@
+# Pl3xMap 원본 소스 클론 (참조용, 3rd-party — 커밋 안 함)
+/reference/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+
+# (frontend 내부 node_modules/.next/.env 등은 frontend/.gitignore 가 처리)

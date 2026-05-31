@@ -1,0 +1,46 @@
+"use client";
+
+import { useMapStore } from "@/lib/store/map";
+
+interface ZoomControlProps {
+  /** 전체보기 시 중심 [lat, lng] (월드 중심) */
+  center: [number, number];
+}
+
+export function ZoomControl({ center }: ZoomControlProps) {
+  const map = useMapStore((s) => s.map);
+
+  const btn =
+    "flex size-9 items-center justify-center text-neutral-200 transition-colors hover:bg-white/10 active:bg-white/20 disabled:opacity-40";
+
+  return (
+    <div className="pointer-events-auto absolute left-3 top-3 z-[1100] flex flex-col overflow-hidden rounded-lg bg-neutral-900/85 text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur">
+      <button
+        type="button"
+        aria-label="확대"
+        onClick={() => map?.zoomIn()}
+        className={`${btn} text-lg`}
+      >
+        +
+      </button>
+      <span className="h-px bg-white/10" />
+      <button
+        type="button"
+        aria-label="축소"
+        onClick={() => map?.zoomOut()}
+        className={`${btn} text-lg`}
+      >
+        −
+      </button>
+      <span className="h-px bg-white/10" />
+      <button
+        type="button"
+        aria-label="전체 보기"
+        onClick={() => map?.setView(center, map.getMinZoom(), { animate: true })}
+        className={`${btn} text-base`}
+      >
+        ⌖
+      </button>
+    </div>
+  );
+}
