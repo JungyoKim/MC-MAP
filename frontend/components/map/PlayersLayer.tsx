@@ -20,6 +20,8 @@ interface MarkerEntry {
   curYaw: number;
   targetYaw: number;
   rotEl: HTMLElement | null;
+  nameEl: HTMLElement | null;
+  name: string;
 }
 
 const LERP = 0.18; // 위치 보간 계수
@@ -94,23 +96,31 @@ export function PlayersLayer({ worldName, maxOut }: PlayersLayerProps) {
       seen.add(pm.uuid);
       const [lat, lng] = blockToCenteredLatLng(pm.x, pm.z, maxOut);
       const yaw = pm.yaw + YAW_OFFSET;
+      // 이름은 settings 스트림(=names)에서 옴. 마커가 먼저 도착하면 uuid 앞 8자리로 임시 표시 후,
+      // 이름이 도착/변경되면 아래에서 라벨을 갱신한다.
+      const desiredName =
+        names[pm.uuid]?.displayName || names[pm.uuid]?.name || pm.uuid.slice(0, 8);
       const existing = entries.get(pm.uuid);
       if (existing) {
         existing.target = { lat, lng };
         existing.targetYaw = yaw;
+        if (existing.name !== desiredName && existing.nameEl) {
+          existing.nameEl.textContent = desiredName; // textContent = 자동 이스케이프
+          existing.name = desiredName;
+        }
       } else {
-        const name = escapeHtml(names[pm.uuid]?.displayName || pm.uuid.slice(0, 8));
         const icon = L.divIcon({
           className: "pl3x-pm",
-          html: markerHtml(name),
+          html: markerHtml(escapeHtml(desiredName)),
           iconSize: [0, 0],
           iconAnchor: [0, 0],
         });
         const marker = L.marker([lat, lng], { icon, pane: "players" });
         marker.addTo(map);
-        const rotEl =
-          (marker.getElement()?.querySelector(".pl3x-pm-rot") as HTMLElement) ??
-          null;
+        const el = marker.getElement();
+        const rotEl = (el?.querySelector(".pl3x-pm-rot") as HTMLElement) ?? null;
+        const nameEl =
+          (el?.querySelector(".pl3x-player-name") as HTMLElement) ?? null;
         if (rotEl) rotEl.style.transform = `rotate(${yaw}deg)`;
         entries.set(pm.uuid, {
           marker,
@@ -119,6 +129,8 @@ export function PlayersLayer({ worldName, maxOut }: PlayersLayerProps) {
           curYaw: yaw,
           targetYaw: yaw,
           rotEl,
+          nameEl,
+          name: desiredName,
         });
       }
     }
