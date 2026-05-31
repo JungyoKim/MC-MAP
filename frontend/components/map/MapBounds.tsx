@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { blockToCenteredLatLng } from "@/lib/pl3x/coords";
+import { isIOS } from "@/lib/isIOS";
 
 interface MapBoundsProps {
   worldName: string;
@@ -76,8 +77,9 @@ export function MapBounds({ worldName, maxOut, fitOnLoad }: MapBoundsProps) {
         // 빨라 크기 미확정 상태로 getBoundsZoom 이 잘못된 fit 을 내고, 그 값으로 setMinZoom
         // 하면 현재 줌이 위로 clamp 되어 "갑자기 확대"됨.)
         map.invalidateSize();
-        // getBoundsZoom 은 현재 minZoom 으로 clamp 되므로 먼저 풀고 계산.
-        map.setMinZoom(-20);
+        // getBoundsZoom 은 현재 minZoom 으로 clamp 됨. iOS 는 음수 줌 금지(바닥 0),
+        // 데스크탑은 충분히 낮춰 진짜 fit 계산.
+        map.setMinZoom(isIOS() ? 0 : -20);
         const fitZoom = map.getBoundsZoom(world);
         // fit 이 현재 줌보다 크게 나와도 현재(복원) 뷰를 끌어올리지 않도록 가드.
         map.setMinZoom(Math.min(fitZoom, map.getZoom()));
