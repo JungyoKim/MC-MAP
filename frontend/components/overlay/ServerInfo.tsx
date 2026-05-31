@@ -24,26 +24,31 @@ export function ServerInfo() {
       type="button"
       onClick={copy}
       title="클릭하여 주소 복사"
-      className={`pointer-events-auto absolute bottom-3 right-3 z-[1100] w-52 overflow-hidden rounded-xl text-left text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur transition-colors sm:w-60 ${
+      className={`pointer-events-auto absolute left-1/2 top-3 z-[1100] w-auto -translate-x-1/2 overflow-hidden rounded-xl text-left text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur transition-colors sm:left-auto sm:right-3 sm:top-auto sm:bottom-3 sm:w-60 sm:translate-x-0 ${
         copied ? "bg-emerald-500/85" : "bg-neutral-900/85 hover:bg-neutral-800/85"
       }`}
     >
-      <div className="flex items-center justify-between px-3 pt-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-300">
-          서버 접속
+      {/* 제목 — 데스크탑만 */}
+      <div className="hidden px-3 pt-2 text-xs font-semibold uppercase tracking-wide text-neutral-300 sm:block">
+        서버 접속
+      </div>
+
+      {/* 주소 + 복사 — 항상(모바일 단일행) */}
+      <div className="flex items-center gap-2 px-3 py-1.5 sm:pt-0.5">
+        <span className="flex-1 truncate font-mono text-sm font-semibold text-neutral-50 sm:text-base">
+          {SERVER.address}
         </span>
         <span
-          className={`rounded px-1.5 py-0.5 text-[11px] ${
+          className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] ${
             copied ? "bg-white/20 text-white" : "bg-white/10 text-neutral-300"
           }`}
         >
           {copied ? "복사됨" : "복사"}
         </span>
       </div>
-      <div className="px-3 pt-0.5 font-mono text-base font-semibold text-neutral-50">
-        {SERVER.address}
-      </div>
-      <div className="px-3 pb-2 text-[11px] text-neutral-300/80">
+
+      {/* 안내 — 데스크탑만 */}
+      <div className="hidden px-3 pb-2 text-[11px] text-neutral-300/80 sm:block">
         Java · Bedrock 공통{" "}
         <span className="opacity-70">(베드락 포트 {SERVER.bedrockPort})</span>
       </div>

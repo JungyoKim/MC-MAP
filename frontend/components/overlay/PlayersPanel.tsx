@@ -10,6 +10,14 @@ interface PlayersPanelProps {
   maxPlayers: number;
 }
 
+function UserIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
+    </svg>
+  );
+}
+
 function PlayerAvatar({ uuid, name }: { uuid: string; name: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) {
@@ -38,12 +46,20 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
   const online = usePlayersStore((s) => s.online);
   const followUuid = useFollowStore((s) => s.followUuid);
   const toggleFollow = useFollowStore((s) => s.toggleFollow);
-  const [open, setOpen] = useState(true);
 
-  // 모바일에선 기본 접힘 (상단 공간 절약)
+  // 모바일에서만 접기 가능 (데스크탑은 항상 펼침)
+  const [isMobile, setIsMobile] = useState(false);
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 640) setOpen(false);
+    const mq = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
+
+  const collapsed = isMobile && !open;
+  const showList = !collapsed;
 
   const list = Object.values(players).sort((a, b) =>
     (a.name ?? "").localeCompare(b.name ?? ""),
@@ -52,34 +68,42 @@ export function PlayersPanel({ worldName, maxPlayers }: PlayersPanelProps) {
   return (
     <div
       className={`pointer-events-auto absolute right-3 top-3 z-[1100] flex flex-col overflow-hidden rounded-lg bg-neutral-900/85 text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur ${
-        open ? "w-44 sm:w-56" : "w-auto"
+        collapsed ? "w-auto" : "w-44 sm:w-56"
       }`}
     >
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold ${open ? "border-b border-white/10" : ""}`}
-      >
-        {open ? (
-          <>
-            <span>
-              플레이어{" "}
-              <span className="text-neutral-400">
-                {online}/{maxPlayers}
+      {isMobile ? (
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold ${open ? "border-b border-white/10" : ""}`}
+        >
+          {open ? (
+            <>
+              <span>
+                플레이어{" "}
+                <span className="text-neutral-400">
+                  {online}/{maxPlayers}
+                </span>
               </span>
-            </span>
-            <span className="ml-auto text-xs text-neutral-400">▾</span>
-          </>
-        ) : (
-          // 접힘(모바일 기본): 작은 칩 — 아이콘 + 접속 수
-          <span className="flex items-center gap-1.5">
-            <span aria-hidden>👥</span>
-            <span>{online}</span>
+              <span className="ml-auto text-neutral-400">▾</span>
+            </>
+          ) : (
+            <>
+              <UserIcon className="size-3.5 text-sky-300" />
+              <span className="tabular-nums">{online}</span>
+            </>
+          )}
+        </button>
+      ) : (
+        <div className="border-b border-white/10 px-3 py-2 text-sm font-semibold">
+          플레이어{" "}
+          <span className="text-neutral-400">
+            {online}/{maxPlayers}
           </span>
-        )}
-      </button>
+        </div>
+      )}
 
-      {open && (
+      {showList && (
         <div className="max-h-[40dvh] flex-1 overflow-y-auto p-1 sm:max-h-[60dvh]">
           {list.length === 0 ? (
             <p className="px-2 py-3 text-center text-xs text-neutral-500">

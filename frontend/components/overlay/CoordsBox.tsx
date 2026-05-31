@@ -106,7 +106,7 @@ export function CoordsBox({ worldName, maxOut }: CoordsBoxProps) {
   return (
     <div
       ref={boxRef}
-      className="pointer-events-none absolute bottom-3 left-3 z-[1100] flex items-center gap-2 rounded-md bg-neutral-900/85 px-2.5 py-1.5 text-xs text-neutral-100 shadow-lg ring-1 ring-white/10 backdrop-blur transition-colors sm:left-1/2 sm:-translate-x-1/2 sm:px-3 sm:text-sm"
+      className="pointer-events-none absolute bottom-3 left-1/2 z-[1100] flex -translate-x-1/2 items-center gap-2 rounded-md bg-neutral-900/85 px-2.5 py-1.5 text-xs text-neutral-100 shadow-lg ring-1 ring-white/10 backdrop-blur transition-colors sm:px-3 sm:text-sm"
     >
       <span ref={xyzRef} className="font-mono tabular-nums">
         -, -, -
