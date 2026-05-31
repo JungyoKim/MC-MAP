@@ -112,7 +112,6 @@ export function MapClient({
         renderer={renderer}
         initialCenter={savedView?.center}
         initialZoom={savedView?.zoom}
-        fitOnLoad={!savedView}
       />
       <WorldSelector
         worlds={worlds}

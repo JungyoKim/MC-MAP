@@ -5,12 +5,10 @@ import L from "leaflet";
 import { MapContainer } from "react-leaflet";
 import { ReversedZoomTileLayer } from "./ReversedZoomTileLayer";
 import { PlayersLayer } from "./PlayersLayer";
-import { MapBounds } from "./MapBounds";
-import { InitialView } from "./InitialView";
+import { MapInit } from "./MapInit";
 import { usePlayerStream } from "@/hooks/usePlayerStream";
 import { usePlayerMarkers } from "@/hooks/usePlayerMarkers";
 import { useMapStore } from "@/lib/store/map";
-import { isIOS } from "@/lib/isIOS";
 import { blockToLatLng, tileLayerOptions, tileUrlTemplate } from "@/lib/pl3x/coords";
 import type { GlobalSettings, WorldSettings } from "@/lib/pl3x/types";
 
@@ -19,21 +17,14 @@ const pl3xCRS = L.Util.extend(L.CRS.Simple, {
   transformation: new L.Transformation(1, 0, 1, 0),
 });
 
-// native maxOut 아래 추가 축소 허용폭 (MapBounds가 실제 floor를 "전체 보기" 줌으로 조임).
-// 타일 그리드는 maxNativeZoom 고정이라 축소해도 요청 수는 안 늘어남.
-const EXTRA_ZOOM_OUT = 8;
-
-
 export interface MapViewProps {
   global: GlobalSettings;
   world: WorldSettings;
   worldName: string;
   renderer: string;
-  /** 월드 재진입 시 복원할 뷰 (없으면 월드 기본 center/zoom) */
+  /** 월드 재진입 시 복원할 뷰 (없으면 기본) */
   initialCenter?: [number, number];
   initialZoom?: number;
-  /** 저장된 뷰가 없을 때(첫 진입) 전체보기로 시작 */
-  fitOnLoad?: boolean;
 }
 
 export function MapView({
@@ -43,7 +34,6 @@ export function MapView({
   renderer,
   initialCenter,
   initialZoom,
-  fitOnLoad,
 }: MapViewProps) {
   usePlayerStream();
   usePlayerMarkers(worldName);
@@ -51,9 +41,9 @@ export function MapView({
   const center =
     initialCenter ??
     blockToLatLng(world.center.x, world.center.z, world.zoom.maxOut);
-  const initZoom = initialZoom ?? world.zoom.maxOut - world.zoom.default;
-  // iOS 는 음수 줌(전체보기 줌아웃)에서 렌더/크래시 문제 → 바닥을 native 0 으로 제한.
-  const minZoomFloor = isIOS() ? 0 : -EXTRA_ZOOM_OUT;
+  // 첫 진입은 native 최대 축소(0=개요), 재진입은 저장된 줌.
+  // 음수 줌(전체보기)은 모바일 크래시/버벅임 원인이라 쓰지 않음 — 원래 webui처럼 native 범위만.
+  const initZoom = initialZoom ?? 0;
 
   return (
     <MapContainer
@@ -61,11 +51,11 @@ export function MapView({
       crs={pl3xCRS}
       center={center}
       zoom={initZoom}
-      minZoom={minZoomFloor}
+      minZoom={0}
       maxZoom={opts.maxZoom}
-      zoomSnap={global.zoom.snap}
-      zoomDelta={global.zoom.delta}
-      wheelPxPerZoomLevel={global.zoom.wheel}
+      // 정수 줌(원래 webui 방식) — 분수 줌(0.25)은 핀치/줌마다 타일 재계산해 버벅임
+      zoomSnap={1}
+      zoomDelta={1}
       zoomControl={false}
       attributionControl={false}
       style={{ height: "100dvh", width: "100vw", background: "#0a0a0a" }}
@@ -76,17 +66,11 @@ export function MapView({
         noWrap={opts.noWrap}
         minNativeZoom={opts.minNativeZoom}
         maxNativeZoom={opts.maxNativeZoom}
-        minZoom={minZoomFloor}
         maxZoom={opts.maxZoom}
         zoomOffset={opts.zoomOffset}
-        keepBuffer={1}
+        keepBuffer={2}
       />
-      <InitialView center={center} zoom={initZoom} minZoom={minZoomFloor} />
-      <MapBounds
-        worldName={worldName}
-        maxOut={world.zoom.maxOut}
-        fitOnLoad={fitOnLoad}
-      />
+      <MapInit />
       <PlayersLayer worldName={worldName} maxOut={world.zoom.maxOut} />
     </MapContainer>
   );
