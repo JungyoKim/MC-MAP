@@ -13,6 +13,17 @@ import { useMapStore } from "@/lib/store/map";
 import { blockToLatLng, tileLayerOptions, tileUrlTemplate } from "@/lib/pl3x/coords";
 import type { GlobalSettings, WorldSettings } from "@/lib/pl3x/types";
 
+// iOS WebKit 크래시 회피 (Leaflet #5749): leaflet 의 3D 변환(translate3d → GPU 레이어)이
+// 타일이 많을 때(전체보기 줌아웃 등) iOS 메모리/GPU 한계를 넘겨 "문제가 반복적으로 발생"
+// 크래시를 일으킴. iOS 에서만 2D 변환을 강제(any3d=false) → 줌 애니메이션도 자동 비활성.
+if (typeof navigator !== "undefined") {
+  const ua = navigator.userAgent;
+  const isIOS =
+    /iPad|iPhone|iPod/.test(ua) ||
+    (/Macintosh/.test(ua) && "ontouchend" in document); // iPadOS 13+
+  if (isIOS) (L.Browser as { any3d: boolean }).any3d = false;
+}
+
 // Pl3xMap 커스텀 CRS: Simple + y축 안 뒤집는 transformation(1,0,1,0)
 const pl3xCRS = L.Util.extend(L.CRS.Simple, {
   transformation: new L.Transformation(1, 0, 1, 0),
