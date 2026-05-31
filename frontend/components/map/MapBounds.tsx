@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useMap } from "react-leaflet";
 import L from "leaflet";
 import { blockToCenteredLatLng } from "@/lib/pl3x/coords";
-import { isIOS } from "@/lib/isIOS";
 
 interface MapBoundsProps {
   worldName: string;
@@ -77,9 +76,9 @@ export function MapBounds({ worldName, maxOut, fitOnLoad }: MapBoundsProps) {
           }
         });
 
-        // 2) 최소 줌 = 전체보기 줌. iOS 는 0 바닥(음수 줌 크래시 회피).
+        // 2) 최소 줌 = 전체보기 줌. (타일 bounds 로 폭증 없으니 iOS 도 음수 줌 허용 테스트)
         map.invalidateSize();
-        map.setMinZoom(isIOS() ? 0 : -20); // clamp 풀고 fit 계산
+        map.setMinZoom(-20); // clamp 풀고 fit 계산
         const fit = map.getBoundsZoom(world);
         map.setMinZoom(Math.min(fit, map.getZoom()));
 

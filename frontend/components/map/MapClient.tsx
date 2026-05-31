@@ -6,7 +6,7 @@ import { WorldSelector } from "@/components/WorldSelector";
 import { ZoomControl } from "@/components/overlay/ZoomControl";
 import { CoordsBox } from "@/components/overlay/CoordsBox";
 import { PlayersPanel } from "@/components/overlay/PlayersPanel";
-import { ServerInfo } from "@/components/overlay/ServerInfo";
+import { InfoButton } from "@/components/overlay/InfoButton";
 import { blockToLatLng } from "@/lib/pl3x/coords";
 import { useMapStore } from "@/lib/store/map";
 import { useFollowStore } from "@/lib/store/follow";
@@ -121,10 +121,12 @@ export function MapClient({
         onRendererChange={changeRenderer}
         busy={busy}
       />
-      <ZoomControl center={resetCenter} />
+      <div className="absolute left-3 top-3 z-[1100] flex flex-col gap-2">
+        <ZoomControl center={resetCenter} />
+        <InfoButton />
+      </div>
       <PlayersPanel worldName={worldName} maxPlayers={global.maxPlayers} />
       <CoordsBox worldName={worldName} maxOut={maxOut} />
-      <ServerInfo />
     </div>
   );
 }

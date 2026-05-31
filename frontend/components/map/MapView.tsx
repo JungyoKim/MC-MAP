@@ -9,7 +9,6 @@ import { MapBounds } from "./MapBounds";
 import { usePlayerStream } from "@/hooks/usePlayerStream";
 import { usePlayerMarkers } from "@/hooks/usePlayerMarkers";
 import { useMapStore } from "@/lib/store/map";
-import { isIOS } from "@/lib/isIOS";
 import { blockToLatLng, tileLayerOptions, tileUrlTemplate } from "@/lib/pl3x/coords";
 import type { GlobalSettings, WorldSettings } from "@/lib/pl3x/types";
 
@@ -18,7 +17,7 @@ const pl3xCRS = L.Util.extend(L.CRS.Simple, {
   transformation: new L.Transformation(1, 0, 1, 0),
 });
 
-// native(0) 아래 허용 여유. 실제 바닥은 MapBounds가 "전체보기 fit"으로 조임. iOS는 0.
+// native(0) 아래 허용 여유. 실제 바닥은 MapBounds가 "전체보기 fit"으로 조임.
 const EXTRA_ZOOM_OUT = 8;
 
 export interface MapViewProps {
@@ -47,7 +46,7 @@ export function MapView({
     blockToLatLng(world.center.x, world.center.z, world.zoom.maxOut);
   // iOS WebKit 은 음수 줌에서 크래시 → 바닥 0. 그 외(데스크탑/Android)는 정수 음수 줌
   // 허용 = 전체보기. 정수 줌(zoomSnap 1) + native 타일이라 부드러움(브라우저 Ctrl+- 원리와 유사).
-  const minZoomFloor = isIOS() ? 0 : -EXTRA_ZOOM_OUT;
+  const minZoomFloor = -EXTRA_ZOOM_OUT;
   // 첫 줌은 native 0(가벼움). 전체보기는 MapBounds가 타일 bounds 적용 후 fitBounds 로 맞춤.
   const initZoom = initialZoom ?? 0;
 
