@@ -5,10 +5,11 @@ import L from "leaflet";
 import { MapContainer } from "react-leaflet";
 import { ReversedZoomTileLayer } from "./ReversedZoomTileLayer";
 import { PlayersLayer } from "./PlayersLayer";
-import { MapInit } from "./MapInit";
+import { MapBounds } from "./MapBounds";
 import { usePlayerStream } from "@/hooks/usePlayerStream";
 import { usePlayerMarkers } from "@/hooks/usePlayerMarkers";
 import { useMapStore } from "@/lib/store/map";
+import { isIOS } from "@/lib/isIOS";
 import { blockToLatLng, tileLayerOptions, tileUrlTemplate } from "@/lib/pl3x/coords";
 import type { GlobalSettings, WorldSettings } from "@/lib/pl3x/types";
 
@@ -16,6 +17,9 @@ import type { GlobalSettings, WorldSettings } from "@/lib/pl3x/types";
 const pl3xCRS = L.Util.extend(L.CRS.Simple, {
   transformation: new L.Transformation(1, 0, 1, 0),
 });
+
+// native(0) 아래 허용 여유. 실제 바닥은 MapBounds가 "전체보기 fit"으로 조임. iOS는 0.
+const EXTRA_ZOOM_OUT = 8;
 
 export interface MapViewProps {
   global: GlobalSettings;
@@ -41,8 +45,10 @@ export function MapView({
   const center =
     initialCenter ??
     blockToLatLng(world.center.x, world.center.z, world.zoom.maxOut);
-  // 첫 진입은 native 최대 축소(0=개요), 재진입은 저장된 줌.
-  // 음수 줌(전체보기)은 모바일 크래시/버벅임 원인이라 쓰지 않음 — 원래 webui처럼 native 범위만.
+  // iOS WebKit 은 음수 줌에서 크래시 → 바닥 0. 그 외(데스크탑/Android)는 정수 음수 줌
+  // 허용 = 전체보기. 정수 줌(zoomSnap 1) + native 타일이라 부드러움(브라우저 Ctrl+- 원리와 유사).
+  const minZoomFloor = isIOS() ? 0 : -EXTRA_ZOOM_OUT;
+  // 첫 줌은 native 0(가벼움). 전체보기는 MapBounds가 타일 bounds 적용 후 fitBounds 로 맞춤.
   const initZoom = initialZoom ?? 0;
 
   return (
@@ -51,7 +57,7 @@ export function MapView({
       crs={pl3xCRS}
       center={center}
       zoom={initZoom}
-      minZoom={0}
+      minZoom={minZoomFloor}
       maxZoom={opts.maxZoom}
       // 정수 줌(원래 webui 방식) — 분수 줌(0.25)은 핀치/줌마다 타일 재계산해 버벅임
       zoomSnap={1}
@@ -66,11 +72,16 @@ export function MapView({
         noWrap={opts.noWrap}
         minNativeZoom={opts.minNativeZoom}
         maxNativeZoom={opts.maxNativeZoom}
+        minZoom={minZoomFloor}
         maxZoom={opts.maxZoom}
         zoomOffset={opts.zoomOffset}
         keepBuffer={2}
       />
-      <MapInit />
+      <MapBounds
+        worldName={worldName}
+        maxOut={world.zoom.maxOut}
+        fitOnLoad={initialZoom === undefined}
+      />
       <PlayersLayer worldName={worldName} maxOut={world.zoom.maxOut} />
     </MapContainer>
   );
