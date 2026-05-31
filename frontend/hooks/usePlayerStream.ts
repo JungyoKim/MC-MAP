@@ -8,11 +8,12 @@ import { usePlayersStore } from "@/lib/store/players";
  * /api/pl3x/sse 의 "settings" 이벤트(JSON .players)를 구독하고,
  * EventSource 가 끊기면 /tiles/settings.json 1.5s 폴링으로 자동 폴백한다.
  */
-export function usePlayerStream(): void {
+export function usePlayerStream(enabled: boolean = true): void {
   const setPlayers = usePlayersStore((s) => s.setPlayers);
   const setConnected = usePlayersStore((s) => s.setConnected);
 
   useEffect(() => {
+    if (!enabled) return; // 공개 라우트: 플레이어 데이터 자체를 안 가져옴
     let es: EventSource | null = null;
     let pollTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -66,5 +67,5 @@ export function usePlayerStream(): void {
       es?.close();
       stopPolling();
     };
-  }, [setPlayers, setConnected]);
+  }, [enabled, setPlayers, setConnected]);
 }

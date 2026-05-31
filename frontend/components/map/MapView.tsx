@@ -29,6 +29,8 @@ export interface MapViewProps {
   /** 월드 재진입 시 복원할 뷰 (없으면 기본) */
   initialCenter?: [number, number];
   initialZoom?: number;
+  /** 플레이어 위치 표시 여부 (공개 / 에서는 false) */
+  showPlayers?: boolean;
 }
 
 export function MapView({
@@ -38,9 +40,10 @@ export function MapView({
   renderer,
   initialCenter,
   initialZoom,
+  showPlayers = true,
 }: MapViewProps) {
-  usePlayerStream();
-  usePlayerMarkers(worldName);
+  usePlayerStream(showPlayers);
+  usePlayerMarkers(worldName, showPlayers);
   const opts = tileLayerOptions(world.zoom);
   const center =
     initialCenter ??
@@ -83,7 +86,9 @@ export function MapView({
         maxOut={world.zoom.maxOut}
         fitOnLoad={initialZoom === undefined}
       />
-      <PlayersLayer worldName={worldName} maxOut={world.zoom.maxOut} />
+      {showPlayers && (
+        <PlayersLayer worldName={worldName} maxOut={world.zoom.maxOut} />
+      )}
     </MapContainer>
   );
 }

@@ -28,6 +28,8 @@ export interface MapClientProps {
   world: WorldSettings;
   worldName: string;
   renderer: string;
+  /** 플레이어 위치/패널 표시 (공개 / 에서는 false, /admin 에서는 true) */
+  showPlayers?: boolean;
 }
 
 export function MapClient({
@@ -35,6 +37,7 @@ export function MapClient({
   world: initialWorld,
   worldName: initialWorldName,
   renderer: initialRenderer,
+  showPlayers = false,
 }: MapClientProps) {
   const [worldName, setWorldName] = useState(initialWorldName);
   const [renderer, setRenderer] = useState(initialRenderer);
@@ -112,6 +115,7 @@ export function MapClient({
         renderer={renderer}
         initialCenter={savedView?.center}
         initialZoom={savedView?.zoom}
+        showPlayers={showPlayers}
       />
       <WorldSelector
         worlds={worlds}
@@ -125,7 +129,9 @@ export function MapClient({
         <InfoButton />
         <ZoomControl center={resetCenter} />
       </div>
-      <PlayersPanel worldName={worldName} maxPlayers={global.maxPlayers} />
+      {showPlayers && (
+        <PlayersPanel worldName={worldName} maxPlayers={global.maxPlayers} />
+      )}
       <CoordsBox worldName={worldName} maxOut={maxOut} />
     </div>
   );

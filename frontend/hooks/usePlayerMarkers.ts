@@ -29,10 +29,14 @@ function parseMarkers(arr: unknown) {
  * EventSource 가 끊기면 markers JSON 1s 폴링으로 자동 폴백.
  * 부드러움은 PlayersLayer 의 rAF 보간이 담당.
  */
-export function usePlayerMarkers(worldName: string): void {
+export function usePlayerMarkers(
+  worldName: string,
+  enabled: boolean = true,
+): void {
   const setMarkers = usePlayerMarkersStore((s) => s.setMarkers);
 
   useEffect(() => {
+    if (!enabled) return; // 공개 라우트: 플레이어 마커 데이터 미수신
     let es: EventSource | null = null;
     let pollTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -83,5 +87,5 @@ export function usePlayerMarkers(worldName: string): void {
       stopPolling();
       setMarkers([]);
     };
-  }, [worldName, setMarkers]);
+  }, [worldName, enabled, setMarkers]);
 }
