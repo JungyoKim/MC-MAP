@@ -33,7 +33,7 @@ function Segmented<T extends string>({
             disabled={busy}
             aria-pressed={active}
             onClick={() => onChange(it.key)}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${
+            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-50 sm:px-3 sm:py-1.5 sm:text-sm ${
               active
                 ? "bg-sky-500/90 text-white"
                 : "text-neutral-300 hover:bg-white/10"

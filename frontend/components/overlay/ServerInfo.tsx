@@ -24,7 +24,7 @@ export function ServerInfo() {
       type="button"
       onClick={copy}
       title="클릭하여 주소 복사"
-      className={`pointer-events-auto absolute bottom-3 right-3 z-[1100] w-60 overflow-hidden rounded-xl text-left text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur transition-colors ${
+      className={`pointer-events-auto absolute bottom-3 right-3 z-[1100] w-52 overflow-hidden rounded-xl text-left text-neutral-100 shadow-xl ring-1 ring-white/10 backdrop-blur transition-colors sm:w-60 ${
         copied ? "bg-emerald-500/85" : "bg-neutral-900/85 hover:bg-neutral-800/85"
       }`}
     >
