@@ -1,9 +1,10 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
+import { useMemo } from "react";
 import L from "leaflet";
 import { MapContainer } from "react-leaflet";
-import { ReversedZoomTileLayer } from "./ReversedZoomTileLayer";
+import { LiveTileLayer } from "./LiveTileLayer";
 import { PlayersLayer } from "./PlayersLayer";
 import { MapBounds } from "./MapBounds";
 import { usePlayerStream } from "@/hooks/usePlayerStream";
@@ -58,6 +59,32 @@ export function MapView({
   // 첫 줌은 native 0(가벼움). 전체보기는 MapBounds가 타일 bounds 적용 후 fitBounds 로 맞춤.
   const initZoom = initialZoom ?? 0;
 
+  // 타일 레이어 옵션 (LiveTileLayer effect 재실행 막으려 메모이즈)
+  const tileUrl = tileUrlTemplate(worldName, renderer, global.format);
+  const tileOptions = useMemo(
+    () => ({
+      tileSize: opts.tileSize,
+      noWrap: opts.noWrap,
+      minNativeZoom: opts.minNativeZoom,
+      maxNativeZoom: opts.maxNativeZoom,
+      minZoom: minZoomFloor,
+      maxZoom: opts.maxZoom,
+      zoomOffset: opts.zoomOffset,
+      keepBuffer: 2,
+    }),
+    [
+      opts.tileSize,
+      opts.noWrap,
+      opts.minNativeZoom,
+      opts.maxNativeZoom,
+      opts.maxZoom,
+      opts.zoomOffset,
+      minZoomFloor,
+    ],
+  );
+  // near-real-time 타일 갱신 주기 (월드 tileUpdateInterval 초, 최소 5초)
+  const refreshMs = Math.max(world.tileUpdateInterval || 10, 5) * 1000;
+
   return (
     <MapContainer
       ref={(m) => useMapStore.getState().setMap(m ?? null)}
@@ -73,17 +100,7 @@ export function MapView({
       attributionControl={false}
       style={{ height: "100dvh", width: "100vw", background: "#0a0a0a" }}
     >
-      <ReversedZoomTileLayer
-        url={tileUrlTemplate(worldName, renderer, global.format)}
-        tileSize={opts.tileSize}
-        noWrap={opts.noWrap}
-        minNativeZoom={opts.minNativeZoom}
-        maxNativeZoom={opts.maxNativeZoom}
-        minZoom={minZoomFloor}
-        maxZoom={opts.maxZoom}
-        zoomOffset={opts.zoomOffset}
-        keepBuffer={2}
-      />
+      <LiveTileLayer url={tileUrl} options={tileOptions} refreshMs={refreshMs} />
       <MapBounds
         worldName={worldName}
         maxOut={world.zoom.maxOut}
