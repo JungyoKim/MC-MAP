@@ -8,7 +8,7 @@ import {
 /**
  * 서버에서 settings 페치 후 지도 렌더.
  * - 공개 / : 온라인 목록 패널만(showPlayerList), 지도 위치 마커는 숨김(showPlayerMarkers=false)
- * - /admin : 둘 다 (마커/추적 포함)
+ * - /pro : 둘 다 (마커/추적 포함)
  */
 export async function MapPage({ admin = false }: { admin?: boolean }) {
   const global = await fetchGlobalSettings();

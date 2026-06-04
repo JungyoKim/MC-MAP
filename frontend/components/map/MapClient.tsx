@@ -28,9 +28,9 @@ export interface MapClientProps {
   world: WorldSettings;
   worldName: string;
   renderer: string;
-  /** 온라인 플레이어 목록 패널 (/ 와 /admin 모두) */
+  /** 온라인 플레이어 목록 패널 (/ 와 /pro 모두) */
   showPlayerList?: boolean;
-  /** 플레이어 위치(지도 마커/추적) — /admin 에서만 */
+  /** 플레이어 위치(지도 마커/추적) — /pro 에서만 */
   showPlayerMarkers?: boolean;
 }
 

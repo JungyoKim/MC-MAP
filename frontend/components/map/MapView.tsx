@@ -32,7 +32,7 @@ export interface MapViewProps {
   initialZoom?: number;
   /** 온라인 플레이어 목록 패널 표시 (공개 / 에서도 true) */
   showPlayerList?: boolean;
-  /** 플레이어 위치(지도 마커/추적) 표시 — /admin 에서만 true */
+  /** 플레이어 위치(지도 마커/추적) 표시 — /pro 에서만 true */
   showPlayerMarkers?: boolean;
 }
 
