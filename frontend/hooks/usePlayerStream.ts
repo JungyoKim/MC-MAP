@@ -4,68 +4,39 @@ import { useEffect } from "react";
 import { usePlayersStore } from "@/lib/store/players";
 
 /**
- * 플레이어 실시간 스트림.
- * /api/pl3x/sse 의 "settings" 이벤트(JSON .players)를 구독하고,
- * EventSource 가 끊기면 /tiles/settings.json 1.5s 폴링으로 자동 폴백한다.
+ * 온라인 플레이어 "목록"(이름/수) 스트림.
+ * 좌표가 제거된 공개 엔드포인트 /api/players 를 폴링한다.
+ * (위치/마커는 usePlayerMarkers 가 인증된 /pro 에서만 가져옴)
+ * 목록은 입퇴장 시에만 변하므로 3초 폴링으로 충분하고, 서버측 2초 캐시로 백엔드 부하는 묶인다.
  */
 export function usePlayerStream(enabled: boolean = true): void {
   const setPlayers = usePlayersStore((s) => s.setPlayers);
   const setConnected = usePlayersStore((s) => s.setConnected);
 
   useEffect(() => {
-    if (!enabled) return; // 공개 라우트: 플레이어 데이터 자체를 안 가져옴
-    let es: EventSource | null = null;
-    let pollTimer: ReturnType<typeof setInterval> | null = null;
+    if (!enabled) return; // 패널 미표시 시 데이터 자체를 안 가져옴
+    let timer: ReturnType<typeof setInterval> | null = null;
+    let aborted = false;
 
-    const applyPlayers = (data: string) => {
+    const poll = async () => {
       try {
-        const json = JSON.parse(data) as { players?: unknown };
-        setPlayers(Array.isArray(json.players) ? json.players : []);
+        const r = await fetch("/api/players", { cache: "no-store" });
+        if (!r.ok) throw new Error(`players ${r.status}`);
+        const j = (await r.json()) as { players?: unknown };
+        if (aborted) return;
+        setPlayers(Array.isArray(j.players) ? j.players : []);
+        setConnected(true);
       } catch {
-        // ignore malformed frame
+        if (!aborted) setConnected(false);
       }
     };
 
-    const startPolling = () => {
-      if (pollTimer) return;
-      const poll = async () => {
-        try {
-          const r = await fetch("/tiles/settings.json", { cache: "no-store" });
-          if (r.ok) {
-            const j = await r.json();
-            setPlayers(Array.isArray(j.players) ? j.players : []);
-          }
-        } catch {
-          // network blip — keep trying
-        }
-      };
-      void poll();
-      pollTimer = setInterval(poll, 1500);
-    };
-
-    const stopPolling = () => {
-      if (pollTimer) {
-        clearInterval(pollTimer);
-        pollTimer = null;
-      }
-    };
-
-    es = new EventSource("/api/pl3x/sse");
-    es.addEventListener("settings", (ev) => {
-      setConnected(true);
-      stopPolling();
-      applyPlayers((ev as MessageEvent).data);
-    });
-    es.onopen = () => setConnected(true);
-    es.onerror = () => {
-      // EventSource 는 자동 재연결하지만, 그 동안 폴백 폴링으로 데이터 유지
-      setConnected(false);
-      startPolling();
-    };
+    void poll();
+    timer = setInterval(poll, 3000);
 
     return () => {
-      es?.close();
-      stopPolling();
+      aborted = true;
+      if (timer) clearInterval(timer);
     };
   }, [enabled, setPlayers, setConnected]);
 }

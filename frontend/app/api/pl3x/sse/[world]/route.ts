@@ -1,14 +1,22 @@
+import { cookies } from "next/headers";
 import { addClient, removeClient } from "@/lib/pl3x/sse-hub";
 import { PL3XMAP_BASE_URL } from "@/lib/pl3x/server";
+import { AUTH_COOKIE, verifyToken } from "@/lib/auth";
 
 // 영구 연결: 정적 최적화/캐시 금지, nodejs 런타임(기본)
 export const dynamic = "force-dynamic";
 
-// 월드별 SSE relay (/sse/{world}). markers 이벤트(플레이어 등 라이브 레이어)를 fan-out.
+// 월드별 SSE relay (/sse/{world}). markers 이벤트(플레이어 위치)를 fan-out.
+// proxy.ts 가 1차로 막지만, 좌표를 흘리는 핵심 엔드포인트라 핸들러에서도 검증(심층 방어).
 export async function GET(
   request: Request,
   ctx: RouteContext<"/api/pl3x/sse/[world]">,
 ): Promise<Response> {
+  const token = (await cookies()).get(AUTH_COOKIE)?.value;
+  if (!(await verifyToken(token))) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const { world } = await ctx.params;
   const path = `/sse/${world}`;
   const encoder = new TextEncoder();
